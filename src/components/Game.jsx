@@ -89,8 +89,12 @@ function Game({ difficulty, onGameOver, onExit }) {
         const value = type === 'mul' ? Math.floor(Math.random() * 2) + 2 : Math.floor(Math.random() * 20) + 5
         g.gates.push({ x: i * gateWidth, y: -100, type, value, width: gateWidth, height: 80, collected: false })
       }
-      // Random Hazards
-      if (Math.random() > 0.5) g.hazards.push({ x: Math.random() * w, y: -200, size: 30, rotation: 0 })
+      // Triple Hazards (Small Boxes)
+      if (Math.random() > 0.5) {
+        for (let i = 0; i < 3; i++) {
+          g.hazards.push({ x: Math.random() * w, y: -250 - (i * 100), size: 30, rotation: 0 })
+        }
+      }
       // Random Powerups
       if (Math.random() > 0.9) {
         const types = ['shield', 'overclock', 'siphon']
@@ -197,14 +201,26 @@ function Game({ difficulty, onGameOver, onExit }) {
         }
       }
 
-      // Hazards & Powerups
+      // Hazards (Falling Small Boxes)
       for (let i = g.hazards.length - 1; i >= 0; i--) {
         const h = g.hazards[i]; h.y += g.config.gateSpeed * 1.3; h.rotation += 0.1
         if (h.y > canvas.height + 50) { g.hazards.splice(i, 1); continue }
         ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.rotation); ctx.shadowBlur = 15; ctx.shadowColor = '#ff4d4d'; ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 3; ctx.strokeRect(-15, -15, 30, 30); ctx.restore()
         if (Math.abs(g.playerX - h.x) < 45 && Math.abs(g.playerY - h.y) < 45) {
-          if (g.activeBuffs.shield > 0) { g.activeBuffs.shield = 0; g.hazards.splice(i, 1); playSound(800, 'sine', 0.4); g.screenShake = 15 }
-          else { g.units = Math.max(0, g.units - 25); g.hazards.splice(i, 1); g.screenShake = 35; playSound(100, 'sawtooth', 0.4); g.combo = 0; setCombo(0); g.blastMode = false; checkGameOver() }
+          if (g.activeBuffs.shield > 0) { 
+            g.activeBuffs.shield = 0; // Shield vanishes
+            g.hazards.splice(i, 1); 
+            playSound(800, 'sine', 0.4); 
+            g.screenShake = 15;
+          }
+          else { 
+            g.units = 0; // Instant Death
+            g.hazards.splice(i, 1); 
+            g.screenShake = 50; 
+            playSound(50, 'sawtooth', 0.6); 
+            checkGameOver();
+            return; // Stop current loop frame
+          }
         }
       }
       for (let i = g.powerups.length - 1; i >= 0; i--) {
