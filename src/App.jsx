@@ -9,6 +9,24 @@ function App() {
   const [difficulty, setDifficulty] = useState('PILOT')
   const [lastScore, setLastScore] = useState(0)
 
+  const [installPrompt, setInstallPrompt] = useState(null)
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setInstallPrompt(null);
+  };
+
   const startGame = (diff) => {
     setDifficulty(diff)
     setScreen('game')
@@ -33,7 +51,7 @@ function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <LandingPage onStart={startGame} />
+            <LandingPage onStart={startGame} onInstall={handleInstall} showInstall={!!installPrompt} />
           </motion.div>
         )}
 

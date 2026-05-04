@@ -25,6 +25,7 @@ function Game({ difficulty, onGameOver, onExit }) {
     playerX: window.innerWidth / 2, playerY: window.innerHeight - 100,
     combo: 0, blastMode: false,
     currentSector: 0,
+    maxUnitsSession: 10,
     activeBuffs: { shield: 0, overclock: 0, siphon: 0 },
     config: { drainRate: 0.1, gateSpeed: 3.5, spawnInterval: 1800 }
   })
@@ -39,7 +40,7 @@ function Game({ difficulty, onGameOver, onExit }) {
     
     // Safety Reset
     const loopState = { active: true }
-    g.units = 10; g.running = true; g.paused = false; g.lastTime = 0; g.gameTime = 0
+    g.units = 10; g.maxUnitsSession = 10; g.running = true; g.paused = false; g.lastTime = 0; g.gameTime = 0
     g.spawnTimer = 5000; // Force immediate spawn on first loop
     g.drainTimer = 0
     g.bullets = []; g.gates = []; g.particles = []; g.hazards = []; g.powerups = []; g.floatingTexts = []; g.drones = []
@@ -103,8 +104,13 @@ function Game({ difficulty, onGameOver, onExit }) {
     }
 
     const checkGameOver = () => {
-      if (g.units <= 0) { g.units = 0; g.running = false; onGameOver(0); return true }
-      return false
+      if (g.units <= 0) {
+        g.units = 0;
+        g.running = false;
+        onGameOver(Math.floor(g.maxUnitsSession)); // Pass max units achieved, not current zero
+        return true;
+      }
+      return false;
     }
 
     const applyGateEffect = (gate) => {
@@ -113,7 +119,12 @@ function Game({ difficulty, onGameOver, onExit }) {
       else if (gate.type === 'sub') g.units -= gate.value
       else if (gate.type === 'mul') g.units *= gate.value
       g.units = Math.max(0, g.units); g.screenShake = g.units > prev ? 12 : 25; playSound(g.units > prev ? 880 : 220, 'square')
-      if (g.units > highScore) { setHighScore(Math.floor(g.units)); localStorage.setItem('mathBlast_highScore', Math.floor(g.units)) }
+      if (g.units > g.maxUnitsSession) g.maxUnitsSession = g.units;
+
+      if (g.units > highScore) {
+        setHighScore(Math.floor(g.units));
+        localStorage.setItem('mathBlast_highScore', Math.floor(g.units));
+      }
       if (g.units > prev) { g.combo++; setCombo(g.combo); if (g.combo >= 5) { g.blastMode = true; playSound(1400, 'sine', 0.4) } }
       else { g.combo = 0; setCombo(0); g.blastMode = false }
       checkGameOver()
