@@ -163,7 +163,8 @@ function Game({ difficulty, onGameOver, onExit }) {
             g.hazards.splice(i, 1); 
             g.screenShake = 35; 
             playSound(100, 'sawtooth', 0.4); 
-            g.combo = 0; setCombo(0); g.blastMode = false 
+            g.combo = 0; setCombo(0); g.blastMode = false;
+            checkGameOver(); // Immediate check
           }
         }
       }
@@ -204,19 +205,49 @@ function Game({ difficulty, onGameOver, onExit }) {
       ctx.restore(); requestAnimationFrame(loop)
     }
 
+    const checkGameOver = () => {
+      if (g.units <= 0) {
+        g.units = 0;
+        g.running = false;
+        onGameOver(Math.floor(g.units));
+        return true;
+      }
+      return false;
+    }
+
     const applyGateEffect = (gate) => {
       const prev = g.units
       if (gate.type === 'add') g.units += gate.value
       else if (gate.type === 'sub') g.units -= gate.value
       else if (gate.type === 'mul') g.units *= gate.value
-      g.units = Math.max(0, g.units); g.screenShake = g.units > prev ? 12 : 25; playSound(g.units > prev ? 880 : 220, 'square')
-      if (g.units > prev) { g.combo++; setCombo(g.combo); if (g.combo >= 5) { g.blastMode = true; playSound(1400, 'sine', 0.4) } }
-      else { g.combo = 0; setCombo(0); g.blastMode = false }
+      
+      g.units = Math.max(0, g.units); 
+      g.screenShake = g.units > prev ? 12 : 25; 
+      playSound(g.units > prev ? 880 : 220, 'square')
+
+      if (g.units > highScore) {
+        setHighScore(Math.floor(g.units));
+        localStorage.setItem('mathBlast_highScore', Math.floor(g.units));
+      }
+
+      if (g.units > prev) { 
+        g.combo++; setCombo(g.combo); 
+        if (g.combo >= 5) { g.blastMode = true; playSound(1400, 'sine', 0.4) } 
+      } else { 
+        g.combo = 0; setCombo(0); g.blastMode = false 
+      }
+
+      checkGameOver();
+
       g.floatingTexts.push({ x: gate.x + gate.width/2, y: gate.y, text: `${gate.type === 'add' ? '+' : gate.type === 'sub' ? '-' : 'x'}${gate.value}`, color: g.units > prev ? SECTORS[g.currentSector].primary : '#ff4d4d', life: 1.0 })
       for (let i = 0; i < 18; i++) g.particles.push({ x: gate.x + gate.width/2, y: gate.y + gate.height/2, color: g.units > prev ? SECTORS[g.currentSector].primary : '#ff4d4d', size: Math.random()*6+2, vx: (Math.random()-0.5)*12, vy: (Math.random()-0.5)*12, life: 1.0, decay: Math.random()*0.04 + 0.02 })
     }
 
-    const handleMove = (e) => { if (g.paused || !g.running) return; g.playerX = e.touches ? e.touches[0].clientX : e.clientX }
+    const handleMove = (e) => { 
+      if (g.paused || !g.running) return; 
+      if (audioCtx.current && audioCtx.current.state === 'suspended') audioCtx.current.resume();
+      g.playerX = e.touches ? e.touches[0].clientX : e.clientX 
+    }
     const autoShoot = setInterval(() => { if (g.running && !g.paused) shoot() }, 350)
     window.addEventListener('mousemove', handleMove); window.addEventListener('touchmove', handleMove, { passive: false })
     requestAnimationFrame(loop)
