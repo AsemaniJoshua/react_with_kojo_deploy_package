@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-function LandingPage({ onStart, onInstall, showInstall }) {
+function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
   const [difficulty, setDifficulty] = useState('PILOT')
   const [showManualGuide, setShowManualGuide] = useState(false)
   const highScore = localStorage.getItem('mathBlast_highScore') || 0
@@ -12,41 +12,20 @@ function LandingPage({ onStart, onInstall, showInstall }) {
     { id: 'ACE', label: 'ACE' }
   ]
 
-  const handleInstallClick = () => {
-    if (showInstall) {
-      onInstall()
-    } else {
+  const handleInstallClick = async () => {
+    const success = await onInstall()
+    if (!success) {
       setShowManualGuide(true)
     }
   }
 
   return (
     <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      minHeight: '100vh', 
-      width: '100vw',
-      textAlign: 'center', 
-      padding: '2rem',
-      background: '#0a0a0c'
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+      minHeight: '100vh', width: '100vw', textAlign: 'center', padding: '2rem', background: '#0a0a0c' 
     }}>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }} 
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <img 
-          src="/icons/icon-192.png" 
-          alt="Math Blast"
-          style={{ 
-            width: '80px', height: '80px', borderRadius: '15px', 
-            marginBottom: '1.5rem',
-            boxShadow: '0 0 30px var(--neon-cyan)',
-            objectFit: 'cover'
-          }} 
-        />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <img src="/icons/icon-192.png" alt="Math Blast" style={{ width: '80px', height: '80px', borderRadius: '15px', marginBottom: '1.5rem', boxShadow: '0 0 30px var(--neon-cyan)', objectFit: 'cover' }} />
         
         <h1 className="orbitron" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', color: 'var(--neon-cyan)', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: '0.2rem', letterSpacing: '4px' }}>MATH BLAST</h1>
         <p style={{ fontSize: '1rem', color: 'var(--neon-magenta)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.5rem', opacity: 0.8 }}>Educational Math Shooter</p>
@@ -81,35 +60,25 @@ function LandingPage({ onStart, onInstall, showInstall }) {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-          <button className="neon-btn" onClick={() => onStart(difficulty)} style={{ minWidth: '280px' }}>
-            START MISSION
-          </button>
-          
-          <button 
-            className="neon-btn"
-            onClick={handleInstallClick}
-            style={{ 
-              minWidth: '280px',
-              borderColor: 'var(--neon-magenta)',
-              color: 'var(--neon-magenta)',
-              fontSize: '1.1rem'
-            }}
-          >
-            INSTALL APP
-          </button>
+          <button className="neon-btn" onClick={() => onStart(difficulty)} style={{ minWidth: '280px' }}>START MISSION</button>
+          <button className="neon-btn" onClick={handleInstallClick} style={{ minWidth: '280px', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)', fontSize: '1.1rem' }}>INSTALL APP</button>
         </div>
 
         <AnimatePresence>
           {showManualGuide && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{ marginTop: '1.5rem', color: '#fff', fontSize: '0.9rem', maxWidth: '300px' }}
-            >
-              <p style={{ opacity: 0.7, marginBottom: '0.5rem' }}>If the pop-up didn't appear:</p>
-              <p style={{ fontSize: '0.8rem' }}>Browser Menu (⋮ or Share) → <b>Add to Home Screen</b></p>
-              <button onClick={() => setShowManualGuide(false)} style={{ background: 'none', border: 'none', color: 'var(--neon-cyan)', cursor: 'pointer', marginTop: '0.5rem', textDecoration: 'underline' }}>Dismiss</button>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ marginTop: '2rem', color: '#fff', fontSize: '0.9rem', maxWidth: '320px' }}>
+              <p style={{ color: 'var(--neon-cyan)', fontWeight: 'bold', marginBottom: '0.8rem' }}>{isIOS ? 'iPhone / iPad Installation:' : 'Manual Installation:'}</p>
+              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', textAlign: 'left' }}>
+                {isIOS ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <p>1. Tap the <b>Share</b> button <span style={{ fontSize: '1.2rem' }}>⎋</span></p>
+                    <p>2. Tap <b>"Add to Home Screen"</b> <span style={{ fontSize: '1.2rem' }}>⊞</span></p>
+                  </div>
+                ) : (
+                  <p>Open browser menu (<b>⋮</b>) and select <b>"Add to Home Screen"</b></p>
+                )}
+              </div>
+              <button onClick={() => setShowManualGuide(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginTop: '1rem', textDecoration: 'underline' }}>Dismiss</button>
             </motion.div>
           )}
         </AnimatePresence>
