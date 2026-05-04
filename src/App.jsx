@@ -10,15 +10,21 @@ function App() {
   const [lastScore, setLastScore] = useState(0)
   const [showAutoModal, setShowAutoModal] = useState(false)
   const [showManualGuide, setShowManualGuide] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
 
   const [installPrompt, setInstallPrompt] = useState(null)
 
   useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
+    // Platform detection
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    setIsIOS(ios);
+
+    const updatePrompt = () => {
+      if (window.deferredPrompt) setInstallPrompt(window.deferredPrompt);
     };
-    window.addEventListener('beforeinstallprompt', handler);
+
+    // Check if it already fired
+    updatePrompt();
 
     // Auto-modal timer (5 seconds)
     const timer = setTimeout(() => {
@@ -26,23 +32,26 @@ function App() {
       if (!dismissed) setShowAutoModal(true)
     }, 5000)
 
+    window.addEventListener('pwa-ready', updatePrompt);
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-      clearTimeout(timer)
+      window.removeEventListener('pwa-ready', updatePrompt);
+      clearTimeout(timer);
     }
   }, []);
 
   const handleInstall = async () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      const { outcome } = await installPrompt.userChoice;
+    const prompt = installPrompt || window.deferredPrompt;
+    if (prompt) {
+      prompt.prompt();
+      const { outcome } = await prompt.userChoice;
       if (outcome === 'accepted') {
         setInstallPrompt(null);
+        window.deferredPrompt = null;
         setShowAutoModal(false);
         setShowManualGuide(false);
       }
     } else {
-      // No native prompt: show manual guide
+      // Still no prompt: show manual guide
       setShowManualGuide(true);
     }
   };
@@ -129,10 +138,21 @@ function App() {
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      style={{ color: 'var(--neon-cyan)', fontSize: '0.9rem', marginTop: '0.5rem' }}
+                      style={{ color: 'var(--neon-cyan)', fontSize: '0.9rem', marginTop: '1rem' }}
                     >
-                      <p style={{ opacity: 0.8, marginBottom: '0.3rem' }}>Native prompt unavailable:</p>
-                      <p><b>Menu (⋮) → Add to Home Screen</b></p>
+                      <p style={{ opacity: 0.8, marginBottom: '0.6rem', fontWeight: 'bold' }}>
+                        {isIOS ? 'iPhone / iPad Installation:' : 'Native prompt unavailable:'}
+                      </p>
+                      <div style={{ fontSize: '1rem', background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px' }}>
+                        {isIOS ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <p>1. Tap the <b>Share</b> button <span style={{ fontSize: '1.2rem' }}>⎋</span></p>
+                            <p>2. Scroll down and tap <b>"Add to Home Screen"</b> <span style={{ fontSize: '1.2rem' }}>⊞</span></p>
+                          </div>
+                        ) : (
+                          <p>Menu (<b>⋮</b>) → <b>Add to Home Screen</b></p>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
