@@ -9,12 +9,17 @@ function App() {
   const [difficulty, setDifficulty] = useState('PILOT')
   const [lastScore, setLastScore] = useState(0)
   const [isIOS, setIsIOS] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
   const [installPrompt, setInstallPrompt] = useState(null)
 
   useEffect(() => {
     // Platform detection
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
+
+    // Standalone detection
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+    setIsStandalone(standalone);
 
     const updatePrompt = () => {
       if (window.deferredPrompt) setInstallPrompt(window.deferredPrompt);
@@ -70,6 +75,7 @@ function App() {
               onInstall={handleInstall} 
               showInstall={!!installPrompt} 
               isIOS={isIOS} 
+              isStandalone={isStandalone}
             />
           </motion.div>
         )}

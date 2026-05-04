@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
+function LandingPage({ onStart, onInstall, showInstall, isIOS, isStandalone }) {
   const [difficulty, setDifficulty] = useState('PILOT')
   const [showIOSGuide, setShowIOSGuide] = useState(false)
   const highScore = localStorage.getItem('mathBlast_highScore') || 0
@@ -61,7 +61,9 @@ function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
           <button className="neon-btn" onClick={() => onStart(difficulty)} style={{ minWidth: '280px' }}>START MISSION</button>
-          <button className="neon-btn" onClick={handleInstallClick} style={{ minWidth: '280px', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)', fontSize: '1.1rem' }}>INSTALL APP</button>
+          {!isStandalone && (
+            <button className="neon-btn" onClick={handleInstallClick} style={{ minWidth: '280px', borderColor: 'var(--neon-magenta)', color: 'var(--neon-magenta)', fontSize: '1.1rem' }}>INSTALL APP</button>
+          )}
         </div>
 
         <AnimatePresence>
