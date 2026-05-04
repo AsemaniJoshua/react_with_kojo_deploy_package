@@ -9,6 +9,7 @@ function App() {
   const [difficulty, setDifficulty] = useState('PILOT')
   const [lastScore, setLastScore] = useState(0)
   const [showAutoModal, setShowAutoModal] = useState(false)
+  const [showManualGuide, setShowManualGuide] = useState(false)
 
   const [installPrompt, setInstallPrompt] = useState(null)
 
@@ -32,16 +33,17 @@ function App() {
   }, []);
 
   const handleInstall = async () => {
-    if (!installPrompt) {
-      // If no prompt, we can't trigger native, but we can show instructions
-      alert("To install: Open browser menu (⋮) and select 'Add to Home Screen'");
-      return;
-    }
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setInstallPrompt(null);
-      setShowAutoModal(false);
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setInstallPrompt(null);
+        setShowAutoModal(false);
+        setShowManualGuide(false);
+      }
+    } else {
+      // No native prompt: show manual guide
+      setShowManualGuide(true);
     }
   };
 
@@ -121,7 +123,21 @@ function App() {
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <button className="neon-btn" onClick={handleInstall} style={{ width: '100%' }}>INSTALL NOW</button>
-                <button onClick={dismissModal} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>NOT NOW</button>
+                
+                <AnimatePresence>
+                  {showManualGuide && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      style={{ color: 'var(--neon-cyan)', fontSize: '0.9rem', marginTop: '0.5rem' }}
+                    >
+                      <p style={{ opacity: 0.8, marginBottom: '0.3rem' }}>Native prompt unavailable:</p>
+                      <p><b>Menu (⋮) → Add to Home Screen</b></p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <button onClick={dismissModal} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline', marginTop: '0.5rem' }}>NOT NOW</button>
               </div>
             </motion.div>
           </motion.div>
