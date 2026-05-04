@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
   const [difficulty, setDifficulty] = useState('PILOT')
-  const [showManualGuide, setShowManualGuide] = useState(false)
+  const [showIOSGuide, setShowIOSGuide] = useState(false)
   const highScore = localStorage.getItem('mathBlast_highScore') || 0
 
   const diffs = [
@@ -14,8 +14,8 @@ function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
 
   const handleInstallClick = async () => {
     const success = await onInstall()
-    if (!success) {
-      setShowManualGuide(true)
+    if (!success && isIOS) {
+      setShowIOSGuide(true)
     }
   }
 
@@ -65,20 +65,16 @@ function LandingPage({ onStart, onInstall, showInstall, isIOS }) {
         </div>
 
         <AnimatePresence>
-          {showManualGuide && (
+          {showIOSGuide && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ marginTop: '2rem', color: '#fff', fontSize: '0.9rem', maxWidth: '320px' }}>
-              <p style={{ color: 'var(--neon-cyan)', fontWeight: 'bold', marginBottom: '0.8rem' }}>{isIOS ? 'iPhone / iPad Installation:' : 'Manual Installation:'}</p>
+              <p style={{ color: 'var(--neon-cyan)', fontWeight: 'bold', marginBottom: '0.8rem' }}>iPhone / iPad Installation:</p>
               <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', textAlign: 'left' }}>
-                {isIOS ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <p>1. Tap the <b>Share</b> button <span style={{ fontSize: '1.2rem' }}>⎋</span></p>
-                    <p>2. Tap <b>"Add to Home Screen"</b> <span style={{ fontSize: '1.2rem' }}>⊞</span></p>
-                  </div>
-                ) : (
-                  <p>Open browser menu (<b>⋮</b>) and select <b>"Add to Home Screen"</b></p>
-                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <p>1. Tap the <b>Share</b> button <span style={{ fontSize: '1.2rem' }}>⎋</span></p>
+                  <p>2. Tap <b>"Add to Home Screen"</b> <span style={{ fontSize: '1.2rem' }}>⊞</span></p>
+                </div>
               </div>
-              <button onClick={() => setShowManualGuide(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginTop: '1rem', textDecoration: 'underline' }}>Dismiss</button>
+              <button onClick={() => setShowIOSGuide(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginTop: '1rem', textDecoration: 'underline' }}>Dismiss</button>
             </motion.div>
           )}
         </AnimatePresence>
