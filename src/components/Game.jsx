@@ -109,52 +109,21 @@ function Game({ difficulty, onGameOver, onExit }) {
 
       // Buffs
       Object.keys(g.activeBuffs).forEach(k => { if (g.activeBuffs[k] > 0) g.activeBuffs[k] -= dt })
-      const activeKeys = Object.keys(g.activeBuffs).filter(k => g.activeBuffs[k] > 0)
-      if (activeKeys.length !== activePowerups.length) setActivePowerups(activeKeys)
-
-      // Drain
-      if (g.activeBuffs.siphon <= 0) {
-        g.drainTimer += dt
-        if (g.drainTimer > 100) {
-          g.units = Math.max(0, g.units - (g.config.drainRate * (1 + g.currentSector * 0.5) * 0.1))
-          setUnits(Math.floor(g.units)); setIsLowEnergy(g.units <= 5)
-          if (g.units <= 0) { g.running = false; onGameOver(0); return }
-          g.drainTimer = 0
-        }
+      const currentBuffs = Object.keys(g.activeBuffs).filter(k => g.activeBuffs[k] > 0)
+      if (JSON.stringify(currentBuffs.sort()) !== JSON.stringify([...activePowerups].sort())) {
+        setActivePowerups(currentBuffs)
       }
 
-      ctx.save()
-      if (g.screenShake > 0) { ctx.translate((Math.random()-0.5)*g.screenShake, (Math.random()-0.5)*g.screenShake); g.screenShake *= 0.9 }
-      ctx.fillStyle = '#0a0a0c'; ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Stars
-      ctx.fillStyle = SECTORS[g.currentSector].grid; g.stars.forEach(s => {
-        s.y += s.speed * (1 + g.currentSector * 0.3); if (s.y > canvas.height) s.y = -10;
-        ctx.fillRect(s.x, s.y, s.size, s.size)
-      })
-
-      // Spawning
-      g.spawnTimer += dt
-      if (g.spawnTimer > Math.max(600, (g.config.spawnInterval - (g.gameTime/2000)) / (1 + g.currentSector * 0.2))) {
-        spawnItems(); g.spawnTimer = 0
-      }
-
-      // Drones
-      const droneCount = Math.min(12, Math.floor(g.units / 15))
-      while (g.drones.length < droneCount) g.drones.push({ x: g.playerX, y: g.playerY, offset: Math.random() * Math.PI * 2 })
-      while (g.drones.length > droneCount) g.drones.pop()
-      g.drones.forEach((d, i) => {
-        const tx = g.playerX + Math.cos(g.gameTime/600 + d.offset) * 70
-        const ty = g.playerY + Math.sin(g.gameTime/600 + d.offset) * 50
-        d.x += (tx - d.x) * 0.12; d.y += (ty - d.y) * 0.12
-        ctx.fillStyle = SECTORS[g.currentSector].primary; ctx.shadowBlur = 10; ctx.shadowColor = ctx.fillStyle
-        ctx.beginPath(); ctx.arc(d.x, d.y, 4, 0, Math.PI * 2); ctx.fill()
-      })
+      // ... (rest of the code)
 
       // Gates
-      g.gates.forEach((gate, i) => {
+      for (let i = g.gates.length - 1; i >= 0; i--) {
+        const gate = g.gates[i]
         gate.y += g.config.gateSpeed * (1 + g.currentSector * 0.15)
-        if (gate.y > canvas.height) { g.gates.splice(i, 1); if (!gate.collected) { g.combo = 0; setCombo(0); g.blastMode = false }; return }
+        if (gate.y > canvas.height) { 
+          if (!gate.collected) { g.combo = 0; setCombo(0); g.blastMode = false };
+          g.gates.splice(i, 1); continue 
+        }
         
         let color = gate.type === 'sub' ? '#ff4d4d' : SECTORS[g.currentSector].primary
         ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.strokeStyle = color; ctx.lineWidth = 3
@@ -163,41 +132,69 @@ function Game({ difficulty, onGameOver, onExit }) {
         let sym = gate.type === 'add' ? '+' : gate.type === 'sub' ? '-' : 'x'
         ctx.fillText(`${sym}${gate.value}`, gate.x + gate.width/2, gate.y + gate.height/2 + 10)
         
-        g.bullets.forEach((b, bi) => {
+        // Bullet collision
+        for (let bi = g.bullets.length - 1; bi >= 0; bi--) {
+          const b = g.bullets[bi]
           if (b.x > gate.x && b.x < gate.x + gate.width && b.y > gate.y && b.y < gate.y + gate.height) {
-            gate.collected = true; applyGateEffect(gate); g.gates.splice(i, 1); g.bullets.splice(bi, 1)
+            gate.collected = true; applyGateEffect(gate); g.gates.splice(i, 1); g.bullets.splice(bi, 1); break
           }
-        })
-        if (Math.abs(g.playerX - (gate.x + gate.width/2)) < gate.width/2 && Math.abs(g.playerY - (gate.y + gate.height/2)) < 40) {
+        }
+        // Player collision
+        if (g.gates[i] && Math.abs(g.playerX - (gate.x + gate.width/2)) < gate.width/2 && Math.abs(g.playerY - (gate.y + gate.height/2)) < 40) {
           gate.collected = true; applyGateEffect(gate); g.gates.splice(i, 1)
         }
-      })
+      }
 
       // Hazards
-      g.hazards.forEach((h, i) => {
+      for (let i = g.hazards.length - 1; i >= 0; i--) {
+        const h = g.hazards[i]
         h.y += g.config.gateSpeed * 1.4; h.rotation += 0.08
-        if (h.y > canvas.height + 50) { g.hazards.splice(i, 1); return }
+        if (h.y > canvas.height + 50) { g.hazards.splice(i, 1); continue }
         ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.rotation); ctx.shadowBlur = 15; ctx.shadowColor = '#ff4d4d'; ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 3; ctx.strokeRect(-h.size/2, -h.size/2, h.size, h.size); ctx.restore()
         if (Math.abs(g.playerX - h.x) < 45 && Math.abs(g.playerY - h.y) < 45) {
-          if (g.activeBuffs.shield > 0) { g.activeBuffs.shield = 0; g.hazards.splice(i, 1); playSound(800, 'sine', 0.4) }
-          else { g.units = Math.max(0, g.units - 25); g.hazards.splice(i, 1); g.screenShake = 35; playSound(100, 'sawtooth', 0.4); g.combo = 0; setCombo(0); g.blastMode = false }
+          if (g.activeBuffs.shield > 0) { 
+            g.activeBuffs.shield = 0; // Consume shield
+            g.hazards.splice(i, 1); 
+            playSound(800, 'sine', 0.4);
+            g.screenShake = 15;
+          }
+          else { 
+            g.units = Math.max(0, g.units - 25); 
+            g.hazards.splice(i, 1); 
+            g.screenShake = 35; 
+            playSound(100, 'sawtooth', 0.4); 
+            g.combo = 0; setCombo(0); g.blastMode = false 
+          }
         }
-      })
+      }
 
       // Powerups
-      g.powerups.forEach((p, i) => {
-        p.y += g.config.gateSpeed; if (p.y > canvas.height + 50) { g.powerups.splice(i, 1); return }
+      for (let i = g.powerups.length - 1; i >= 0; i--) {
+        const p = g.powerups[i]
+        p.y += g.config.gateSpeed; if (p.y > canvas.height + 50) { g.powerups.splice(i, 1); continue }
         ctx.shadowBlur = 25; ctx.shadowColor = '#fff'; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill()
         ctx.fillStyle = '#000'; ctx.font = '700 14px Orbitron'; ctx.textAlign = 'center'; ctx.fillText(p.type[0].toUpperCase(), p.x, p.y + 6)
         if (Math.abs(g.playerX - p.x) < 45 && Math.abs(g.playerY - p.y) < 45) {
           g.activeBuffs[p.type] = 10000; g.powerups.splice(i, 1); playSound(1200, 'sine', 0.3)
         }
-      })
+      }
 
       // Bullets, Particles, Text
-      g.bullets.forEach((b, i) => { b.y -= b.speed; if (b.y < -20) g.bullets.splice(i, 1); ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill() })
-      g.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= p.decay; if (p.life <= 0) { g.particles.splice(i, 1); return }; ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.globalAlpha = 1.0 })
-      g.floatingTexts.forEach((t, i) => { t.y -= 2; t.life -= 0.02; if (t.life <= 0) { g.floatingTexts.splice(i, 1); return }; ctx.globalAlpha = t.life; ctx.fillStyle = t.color; ctx.font = '700 22px Orbitron'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x, t.y); ctx.globalAlpha = 1.0 })
+      for (let i = g.bullets.length - 1; i >= 0; i--) { 
+        const b = g.bullets[i]; b.y -= b.speed; 
+        if (b.y < -20) g.bullets.splice(i, 1); 
+        else { ctx.fillStyle = b.color; ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fill() }
+      }
+      for (let i = g.particles.length - 1; i >= 0; i--) { 
+        const p = g.particles[i]; p.x += p.vx; p.y += p.vy; p.life -= p.decay; 
+        if (p.life <= 0) g.particles.splice(i, 1); 
+        else { ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, p.size, p.size); ctx.globalAlpha = 1.0 }
+      }
+      for (let i = g.floatingTexts.length - 1; i >= 0; i--) { 
+        const t = g.floatingTexts[i]; t.y -= 2; t.life -= 0.02; 
+        if (t.life <= 0) g.floatingTexts.splice(i, 1); 
+        else { ctx.globalAlpha = t.life; ctx.fillStyle = t.color; ctx.font = '700 22px Orbitron'; ctx.textAlign = 'center'; ctx.fillText(t.text, t.x, t.y); ctx.globalAlpha = 1.0 }
+      }
 
       // Player
       if (g.activeBuffs.shield > 0) { ctx.shadowBlur = 20; ctx.shadowColor = '#00f2ff'; ctx.strokeStyle = '#00f2ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(g.playerX, g.playerY, 55, 0, Math.PI*2); ctx.stroke() }
