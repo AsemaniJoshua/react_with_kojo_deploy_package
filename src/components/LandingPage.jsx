@@ -14,22 +14,24 @@ function LandingPage({ onStart, onInstall, showInstall }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: '2rem' }}>
       <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <div style={{ 
-          width: '80px', height: '80px', borderRadius: '15px', 
-          background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', 
-          fontSize: '2.5rem', fontWeight: 'bold', margin: '0 auto 2rem auto',
-          boxShadow: '0 0 30px var(--neon-cyan)',
-          fontFamily: 'Orbitron'
-        }}>M</div>
+        <img 
+          src="/icons/icon-192.png" 
+          alt="Math Blast Logo"
+          style={{ 
+            width: '80px', height: '80px', borderRadius: '15px', 
+            marginBottom: '2rem',
+            boxShadow: '0 0 30px var(--neon-cyan)',
+            objectFit: 'cover'
+          }} 
+        />
         
-        <h1 className="orbitron" style={{ fontSize: 'clamp(3rem, 10vw, 5rem)', letterSpacing: '8px', color: 'var(--neon-cyan)', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: '0.5rem' }}>MATH BLAST</h1>
-        <p style={{ fontSize: '1.2rem', color: 'var(--neon-magenta)', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '1rem', opacity: 0.8 }}>Educational Math Shooter</p>
+        <h1 className="orbitron" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', letterSpacing: '6px', color: 'var(--neon-cyan)', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: '0.2rem' }}>MATH BLAST</h1>
+        <p style={{ fontSize: '1rem', color: 'var(--neon-magenta)', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '1rem', opacity: 0.8 }}>Educational Math Shooter</p>
         
         {highScore > 0 && (
-          <div style={{ marginBottom: '3rem' }}>
-            <p style={{ fontSize: '0.9rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '2px' }}>Personal Best</p>
-            <p className="orbitron" style={{ fontSize: '2rem', color: '#fff' }}>{highScore}</p>
+          <div style={{ marginBottom: '2rem' }}>
+            <p style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Personal Best</p>
+            <p className="orbitron" style={{ fontSize: '1.6rem', color: '#fff' }}>{highScore}</p>
           </div>
         )}
 

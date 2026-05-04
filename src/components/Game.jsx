@@ -271,18 +271,18 @@ function Game({ difficulty, onGameOver, onExit }) {
       <canvas ref={canvasRef} style={{ display: 'block' }} />
       {/* HUD */}
       <div style={{ position: 'fixed', top: '25px', left: '25px', pointerEvents: 'none', zIndex: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: SECTORS[sectorIndex].primary, textShadow: `0 0 12px ${SECTORS[sectorIndex].primary}`, marginBottom: '0.5rem' }}>
-          <Wind size={26} />
-          <span className="orbitron" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{SECTORS[sectorIndex].name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', color: SECTORS[sectorIndex].primary, textShadow: `0 0 10px ${SECTORS[sectorIndex].primary}`, marginBottom: '0.3rem' }}>
+          <Wind size={20} />
+          <span className="orbitron" style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{SECTORS[sectorIndex].name}</span>
         </div>
-        <div className={`orbitron ${isLowEnergy ? 'low-energy' : ''}`} style={{ fontSize: '3.5rem', color: SECTORS[sectorIndex].primary, textShadow: `0 0 20px ${SECTORS[sectorIndex].primary}`, fontWeight: '900', lineHeight: 1 }}>
+        <div className={`orbitron ${isLowEnergy ? 'low-energy' : ''}`} style={{ fontSize: '2.5rem', color: SECTORS[sectorIndex].primary, textShadow: `0 0 15px ${SECTORS[sectorIndex].primary}`, fontWeight: '900', lineHeight: 1 }}>
           UNITS: {Math.floor(units)}
         </div>
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: '0.8rem' }}>
           <AnimatePresence>
             {combo > 0 && (
-              <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="orbitron" style={{ color: combo >= 5 ? '#fff' : SECTORS[sectorIndex].secondary, textShadow: '0 0 12px currentColor', fontSize: '1.2rem' }}>
-                COMBO x{combo} {combo >= 5 && ' — OVERDRIVE ACTIVATED'}
+              <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }} className="orbitron" style={{ color: combo >= 5 ? '#fff' : SECTORS[sectorIndex].secondary, textShadow: '0 0 10px currentColor', fontSize: '1rem' }}>
+                COMBO x{combo} {combo >= 5 && ' — OVERDRIVE'}
               </motion.div>
             )}
           </AnimatePresence>
