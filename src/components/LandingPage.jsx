@@ -66,13 +66,16 @@ function LandingPage({ onStart, onInstall, showInstall }) {
           {showInstall && (
             <button 
               onClick={onInstall}
+              className="neon-btn"
               style={{ 
-                background: 'none', border: 'none', color: 'var(--neon-cyan)', 
-                textDecoration: 'underline', cursor: 'pointer', opacity: 0.8,
-                fontSize: '1rem', fontFamily: 'Orbitron'
+                minWidth: '300px',
+                borderColor: 'var(--neon-magenta)',
+                color: 'var(--neon-magenta)',
+                boxShadow: '0 0 15px rgba(255, 0, 255, 0.3)',
+                marginTop: '0.5rem'
               }}
             >
-              INSTALL TO DEVICE
+              INSTALL APP
             </button>
           )}
         </div>
