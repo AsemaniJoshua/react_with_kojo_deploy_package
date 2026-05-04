@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function LandingPage({ onStart, onInstall, showInstall }) {
   const [difficulty, setDifficulty] = useState('PILOT')
+  const [showManualGuide, setShowManualGuide] = useState(false)
   const highScore = localStorage.getItem('mathBlast_highScore') || 0
 
   const diffs = [
@@ -10,6 +11,14 @@ function LandingPage({ onStart, onInstall, showInstall }) {
     { id: 'PILOT', label: 'PILOT' },
     { id: 'ACE', label: 'ACE' }
   ]
+
+  const handleInstallClick = () => {
+    if (showInstall) {
+      onInstall()
+    } else {
+      setShowManualGuide(true)
+    }
+  }
 
   return (
     <div style={{ 
@@ -76,25 +85,37 @@ function LandingPage({ onStart, onInstall, showInstall }) {
             START MISSION
           </button>
           
-          {showInstall && (
-            <button 
-              className="neon-btn"
-              onClick={onInstall}
-              style={{ 
-                minWidth: '280px',
-                borderColor: 'var(--neon-magenta)',
-                color: 'var(--neon-magenta)',
-                fontSize: '1.1rem'
-              }}
-            >
-              INSTALL APP
-            </button>
-          )}
+          <button 
+            className="neon-btn"
+            onClick={handleInstallClick}
+            style={{ 
+              minWidth: '280px',
+              borderColor: 'var(--neon-magenta)',
+              color: 'var(--neon-magenta)',
+              fontSize: '1.1rem'
+            }}
+          >
+            INSTALL APP
+          </button>
         </div>
+
+        <AnimatePresence>
+          {showManualGuide && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{ marginTop: '1.5rem', color: '#fff', fontSize: '0.9rem', maxWidth: '300px' }}
+            >
+              <p style={{ opacity: 0.7, marginBottom: '0.5rem' }}>If the pop-up didn't appear:</p>
+              <p style={{ fontSize: '0.8rem' }}>Browser Menu (⋮ or Share) → <b>Add to Home Screen</b></p>
+              <button onClick={() => setShowManualGuide(false)} style={{ background: 'none', border: 'none', color: 'var(--neon-cyan)', cursor: 'pointer', marginTop: '0.5rem', textDecoration: 'underline' }}>Dismiss</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div style={{ marginTop: '4rem', opacity: 0.4, fontSize: '0.75rem' }}>
           <p>DRAG TO MOVE • AUTO-FIRE ON</p>
-          {!showInstall && <p style={{ marginTop: '0.5rem' }}>PWA Ready — Add to Home Screen via browser menu</p>}
         </div>
       </motion.div>
     </div>
