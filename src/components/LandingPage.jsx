@@ -12,45 +12,58 @@ function LandingPage({ onStart, onInstall, showInstall }) {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: '2rem' }}>
-      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      minHeight: '100vh', 
+      width: '100vw',
+      textAlign: 'center', 
+      padding: '2rem',
+      background: '#0a0a0c'
+    }}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <img 
           src="/icons/icon-192.png" 
-          alt="Math Blast Logo"
+          alt="Math Blast"
           style={{ 
             width: '80px', height: '80px', borderRadius: '15px', 
-            marginBottom: '2rem',
+            marginBottom: '1.5rem',
             boxShadow: '0 0 30px var(--neon-cyan)',
             objectFit: 'cover'
           }} 
         />
         
-        <h1 className="orbitron" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', letterSpacing: '6px', color: 'var(--neon-cyan)', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: '0.2rem' }}>MATH BLAST</h1>
-        <p style={{ fontSize: '1rem', color: 'var(--neon-magenta)', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '1rem', opacity: 0.8 }}>Educational Math Shooter</p>
+        <h1 className="orbitron" style={{ fontSize: 'clamp(2rem, 8vw, 3.5rem)', color: 'var(--neon-cyan)', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: '0.2rem', letterSpacing: '4px' }}>MATH BLAST</h1>
+        <p style={{ fontSize: '1rem', color: 'var(--neon-magenta)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1.5rem', opacity: 0.8 }}>Educational Math Shooter</p>
         
         {highScore > 0 && (
           <div style={{ marginBottom: '2rem' }}>
-            <p style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Personal Best</p>
+            <p style={{ fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase' }}>Personal Best</p>
             <p className="orbitron" style={{ fontSize: '1.6rem', color: '#fff' }}>{highScore}</p>
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.8rem', marginBottom: '2.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {diffs.map(d => (
             <button
               key={d.id}
               onClick={() => setDifficulty(d.id)}
               style={{
                 background: difficulty === d.id ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: difficulty === d.id ? '2px solid var(--neon-cyan)' : '1px solid rgba(0, 242, 255, 0.3)',
+                border: difficulty === d.id ? '2px solid var(--neon-cyan)' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: difficulty === d.id ? 'var(--neon-cyan)' : 'white',
-                padding: '0.8rem 2rem',
-                borderRadius: '12px',
+                padding: '0.6rem 1.5rem',
+                borderRadius: '10px',
                 cursor: 'pointer',
                 fontFamily: 'Orbitron',
-                boxShadow: difficulty === d.id ? '0 0 15px var(--neon-cyan)' : 'none',
-                transition: 'all 0.3s ease',
-                minWidth: '140px'
+                transition: 'all 0.2s ease',
+                minWidth: '120px'
               }}
             >
               {d.label}
@@ -58,21 +71,20 @@ function LandingPage({ onStart, onInstall, showInstall }) {
           ))}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
-          <button className="neon-btn" onClick={() => onStart(difficulty)} style={{ minWidth: '300px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+          <button className="neon-btn" onClick={() => onStart(difficulty)} style={{ minWidth: '280px' }}>
             START MISSION
           </button>
           
           {showInstall && (
             <button 
-              onClick={onInstall}
               className="neon-btn"
+              onClick={onInstall}
               style={{ 
-                minWidth: '300px',
+                minWidth: '280px',
                 borderColor: 'var(--neon-magenta)',
                 color: 'var(--neon-magenta)',
-                boxShadow: '0 0 15px rgba(255, 0, 255, 0.3)',
-                marginTop: '0.5rem'
+                fontSize: '1.1rem'
               }}
             >
               INSTALL APP
@@ -80,14 +92,9 @@ function LandingPage({ onStart, onInstall, showInstall }) {
           )}
         </div>
 
-        <div style={{ marginTop: '4rem', opacity: 0.5, fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '2rem' }}>
-            <p>DRAG TO MOVE</p>
-            <p>AUTO-FIRE ACTIVE</p>
-          </div>
-          {!showInstall && (
-            <p style={{ opacity: 0.4 }}>If "Install" is missing, use browser menu → "Add to Home Screen"</p>
-          )}
+        <div style={{ marginTop: '4rem', opacity: 0.4, fontSize: '0.75rem' }}>
+          <p>DRAG TO MOVE • AUTO-FIRE ON</p>
+          {!showInstall && <p style={{ marginTop: '0.5rem' }}>PWA Ready — Add to Home Screen via browser menu</p>}
         </div>
       </motion.div>
     </div>
