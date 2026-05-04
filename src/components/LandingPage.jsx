@@ -1,8 +1,8 @@
-import { useState, motion } from 'framer-motion'
-import { useState as useReactState } from 'react'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 function LandingPage({ onStart, onInstall, showInstall }) {
-  const [difficulty, setDifficulty] = useReactState('PILOT')
+  const [difficulty, setDifficulty] = useState('PILOT')
   const highScore = localStorage.getItem('mathBlast_highScore') || 0
 
   const diffs = [
@@ -75,9 +75,14 @@ function LandingPage({ onStart, onInstall, showInstall }) {
           )}
         </div>
 
-        <div style={{ marginTop: '4rem', opacity: 0.5, fontSize: '0.9rem', display: 'flex', gap: '2rem', justifyContent: 'center' }}>
-          <p>DRAG TO MOVE</p>
-          <p>AUTO-FIRE ACTIVE</p>
+        <div style={{ marginTop: '4rem', opacity: 0.5, fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '2rem' }}>
+            <p>DRAG TO MOVE</p>
+            <p>AUTO-FIRE ACTIVE</p>
+          </div>
+          {!showInstall && (
+            <p style={{ opacity: 0.4 }}>If "Install" is missing, use browser menu → "Add to Home Screen"</p>
+          )}
         </div>
       </motion.div>
     </div>
